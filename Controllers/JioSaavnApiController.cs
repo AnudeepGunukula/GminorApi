@@ -79,12 +79,12 @@ namespace GminorApi.Controllers
 
             string result = jsonData.Result;
 
-            GetSongDetails(result, id);
-            return Ok();
+            var song = GetSongDetails(result, id);
+            return Ok(song);
         }
 
 
-        public static void GetSongDetails(string result, string id)
+        public static SongDetails GetSongDetails(string result, string id)
         {
             SongDetails song = new SongDetails();
             int Startindex = result.IndexOf("\"media_preview_url\":\"");
@@ -102,14 +102,47 @@ namespace GminorApi.Controllers
             Startindex = result.IndexOf("\"albumid\":\"");
             Endindex = result.IndexOf("\",\"language\":");
 
-            Console.WriteLine(result.Substring(Startindex + 11, Endindex - Startindex - 11));
+            string albumId = result.Substring(Startindex + 11, Endindex - Startindex - 11);
 
 
 
             song.Id = id;
             song.SourceUrl = sourceUrl;
+            song.AlbumId = albumId;
+            song.Lyrics = GetLyrics(id).Result;
 
+            return song;
 
+        }
+
+        public static async Task<string> GetLyrics(string id)
+        {
+
+            string url = lyrics_base_url + id;
+            var httpClient = new HttpClient();
+            var request = new HttpRequestMessage(new HttpMethod("GET"), url);
+            request.Headers.TryAddWithoutValidation("Host", "www.jiosaavn.com");
+            request.Headers.TryAddWithoutValidation("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:94.0) Gecko/20100101 Firefox/94.0");
+            request.Headers.TryAddWithoutValidation("Accept", "application/json, text/plain, */*");
+            request.Headers.TryAddWithoutValidation("Accept-Language", "en-US,en;q=0.5");
+            request.Headers.TryAddWithoutValidation("DNT", "1");
+            request.Headers.TryAddWithoutValidation("Connection", "keep-alive");
+            //request.Headers.TryAddWithoutValidation("Referer", referer);
+            request.Headers.TryAddWithoutValidation("Sec-Fetch-Dest", "empty");
+            request.Headers.TryAddWithoutValidation("Sec-Fetch-Mode", "cors");
+            request.Headers.TryAddWithoutValidation("Sec-Fetch-Site", "same-origin");
+            request.Headers.TryAddWithoutValidation("Cache-Control", "max-age=0");
+            request.Headers.TryAddWithoutValidation("TE", "trailers");
+
+            var response = await httpClient.SendAsync(request);
+
+            var jsonData = response.Content.ReadAsStringAsync();
+
+            string result = jsonData.Result;
+
+            string lyrics = result.Split("\"lyrics\":\"")[1].Split("\",\"script_tracking_url\"")[0];
+
+            return lyrics;
 
         }
 
