@@ -18,6 +18,7 @@ namespace GminorApi.Controllers
 
 
         [HttpPost]
+        [Route("SearchSong")]
         public async Task<IActionResult> SearchSong(string songName)
         {
 
@@ -45,8 +46,6 @@ namespace GminorApi.Controllers
 
             string result = jsonData.Result;
 
-            System.IO.File.WriteAllText("output.json", result);
-
             var searchedsongs = GetSongs(result);
 
 
@@ -54,6 +53,65 @@ namespace GminorApi.Controllers
 
         }
 
+        [HttpPost]
+        [Route("SongDetails")]
+        public async Task<IActionResult> SongDetails(string id)
+        {
+            string url = song_details_base_url + id;
+            var httpClient = new HttpClient();
+            var request = new HttpRequestMessage(new HttpMethod("GET"), url);
+            request.Headers.TryAddWithoutValidation("Host", "www.jiosaavn.com");
+            request.Headers.TryAddWithoutValidation("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:94.0) Gecko/20100101 Firefox/94.0");
+            request.Headers.TryAddWithoutValidation("Accept", "application/json, text/plain, */*");
+            request.Headers.TryAddWithoutValidation("Accept-Language", "en-US,en;q=0.5");
+            request.Headers.TryAddWithoutValidation("DNT", "1");
+            request.Headers.TryAddWithoutValidation("Connection", "keep-alive");
+            //request.Headers.TryAddWithoutValidation("Referer", referer);
+            request.Headers.TryAddWithoutValidation("Sec-Fetch-Dest", "empty");
+            request.Headers.TryAddWithoutValidation("Sec-Fetch-Mode", "cors");
+            request.Headers.TryAddWithoutValidation("Sec-Fetch-Site", "same-origin");
+            request.Headers.TryAddWithoutValidation("Cache-Control", "max-age=0");
+            request.Headers.TryAddWithoutValidation("TE", "trailers");
+
+            var response = await httpClient.SendAsync(request);
+
+            var jsonData = response.Content.ReadAsStringAsync();
+
+            string result = jsonData.Result;
+
+            GetSongDetails(result, id);
+            return Ok();
+        }
+
+
+        public static void GetSongDetails(string result, string id)
+        {
+            SongDetails song = new SongDetails();
+            int Startindex = result.IndexOf("\"media_preview_url\":\"");
+            int Endindex = result.IndexOf(".mp4\",");
+            string sourceUrl = result.Substring(Startindex + 21, Endindex - Startindex - 17).Replace("\\", "").Replace("preview", "aac");
+            if (result.Contains("320kbps\":\"true"))
+            {
+                sourceUrl = sourceUrl.Replace("_96_p.mp4", "_320.mp4");
+            }
+            else
+            {
+                sourceUrl = sourceUrl.Replace("_96_p.mp4", "_160.mp4");
+            }
+
+            Startindex = result.IndexOf("\"albumid\":\"");
+            Endindex = result.IndexOf("\",\"language\":");
+
+            Console.WriteLine(result.Substring(Startindex + 11, Endindex - Startindex - 11));
+
+
+
+            song.Id = id;
+            song.SourceUrl = sourceUrl;
+
+
+
+        }
 
         public static List<SearchResult> GetSongs(string result)
         {
