@@ -15,6 +15,52 @@ namespace GminorApi.Controllers
 
         private static readonly string lyrics_base_url = "https://www.jiosaavn.com/api.php?__call=lyrics.getLyrics&ctx=web6dot0&api_version=4&_format=json&_marker=0%3F_marker%3D0&lyrics_id=";
 
+        private static readonly string album_details_base_url = "https://www.jiosaavn.com/api.php?__call=content.getAlbumDetails&_format=json&cc=in&_marker=0%3F_marker%3D0&albumid=";
+
+
+        [HttpPost]
+        [Route("GetAlbumDetails")]
+        public async void GetAlbumDetails(string id)
+        {
+
+            string url = album_details_base_url + id;
+            var httpClient = new HttpClient();
+            var request = new HttpRequestMessage(new HttpMethod("GET"), url);
+            request.Headers.TryAddWithoutValidation("Host", "www.jiosaavn.com");
+            request.Headers.TryAddWithoutValidation("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:94.0) Gecko/20100101 Firefox/94.0");
+            request.Headers.TryAddWithoutValidation("Accept", "application/json, text/plain, */*");
+            request.Headers.TryAddWithoutValidation("Accept-Language", "en-US,en;q=0.5");
+            request.Headers.TryAddWithoutValidation("DNT", "1");
+            request.Headers.TryAddWithoutValidation("Connection", "keep-alive");
+            //request.Headers.TryAddWithoutValidation("Referer", referer);
+            request.Headers.TryAddWithoutValidation("Sec-Fetch-Dest", "empty");
+            request.Headers.TryAddWithoutValidation("Sec-Fetch-Mode", "cors");
+            request.Headers.TryAddWithoutValidation("Sec-Fetch-Site", "same-origin");
+            request.Headers.TryAddWithoutValidation("Cache-Control", "max-age=0");
+            request.Headers.TryAddWithoutValidation("TE", "trailers");
+
+            var response = await httpClient.SendAsync(request);
+
+            var jsonData = response.Content.ReadAsStringAsync();
+
+            string result = jsonData.Result;
+
+            System.IO.File.WriteAllText("output.txt", result);
+
+            GetAlbumMeta(result);
+
+        }
+
+        public static void GetAlbumMeta(string result)
+        {
+            Album album = new Album();
+
+            int Startindex = result.IndexOf("\"title\":\"");
+            int Endindex = result.IndexOf("\",\"name\":\"");
+            Console.WriteLine(result.Substring(Startindex + 5, Endindex - Startindex - 1));
+
+
+        }
 
 
         [HttpPost]

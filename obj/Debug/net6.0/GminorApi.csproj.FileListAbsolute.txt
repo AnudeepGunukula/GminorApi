@@ -25,4 +25,3 @@
 /workspace/GminorApi/obj/Debug/net6.0/ref/GminorApi.dll
 /workspace/GminorApi/obj/Debug/net6.0/GminorApi.pdb
 /workspace/GminorApi/obj/Debug/net6.0/GminorApi.genruntimeconfig.cache
-/workspace/GminorApi/bin/Debug/net6.0/output.json
