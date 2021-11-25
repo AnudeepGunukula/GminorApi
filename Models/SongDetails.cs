@@ -7,10 +7,10 @@ namespace GminorApi.Models
 {
     public class SongDetails
     {
-        private string id;
-        private string sourceUrl;
-        private string lyrics;
-        private string albumId;
+        private string id = string.Empty;
+        private string sourceUrl = string.Empty;
+        private string lyrics = string.Empty;
+        private string albumId = string.Empty;
 
         public string Id { get => id; set => id = value; }
         public string SourceUrl { get => sourceUrl; set => sourceUrl = value; }

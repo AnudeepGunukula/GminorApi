@@ -22,7 +22,7 @@ namespace GminorApi.Controllers
 
         [HttpPost]
         [Route("GetAlbumDetails")]
-        public async void GetAlbumDetails(string id)
+        public async Task<IActionResult> GetAlbumDetails(string id)
         {
 
             string url = album_details_base_url + id;
@@ -47,20 +47,58 @@ namespace GminorApi.Controllers
 
             string result = jsonData.Result;
 
-            System.IO.File.WriteAllText("output.txt", result);
-
-            GetAlbumMeta(result);
+            Album album = GetAlbumMeta(result, id);
+            return Ok(album);
 
         }
 
-        public static void GetAlbumMeta(string result)
+        public static Album GetAlbumMeta(string result, string id)
         {
             Album album = new Album();
 
             int Startindex = result.IndexOf("\"title\":\"");
             int Endindex = result.IndexOf("\",\"name\":\"");
-            Console.WriteLine(result.Substring(Startindex + 5, Endindex - Startindex - 1));
+            album.AlbumName = filter(result.Substring(Startindex + 9, Endindex - Startindex - 9));
 
+            album.AlbumId = id;
+
+            List<AlbumSongs> albumsongs = new List<AlbumSongs>();
+
+            string splitStrStart = "{\"id\":\"";
+            string[] ids = result.Split(splitStrStart);
+
+            for (int i = 1; i < ids.Length; i++)
+            {
+
+                AlbumSongs albumsong = new AlbumSongs();
+                string text = ids[i];
+
+                Startindex = 0;
+                Endindex = text.IndexOf(",\"type\"");
+
+                albumsong.Id = text.Substring(Startindex, Endindex - 1);
+
+                Startindex = text.IndexOf("\"song\":\"");
+                Endindex = text.IndexOf(",\"album\"");
+                albumsong.Title = filter(text.Substring(Startindex + 8, Endindex - Startindex - 9));
+
+                Startindex = text.IndexOf("\"primary_artists\":\"");
+                Endindex = text.IndexOf("\",\"primary_artists_id\"");
+
+                albumsong.Artist = filter(text.Substring(Startindex + 19, Endindex - Startindex - 19));
+
+
+                Startindex = text.IndexOf("\"image\":\"");
+                Endindex = text.IndexOf("\",\"label\"");
+                albumsong.Image = text.Substring(Startindex + 9, Endindex - Startindex - 9).Replace("\\", "").Replace("http:", "https:");
+
+                albumsongs.Add(albumsong);
+
+            }
+
+            album.AlbumSongs = albumsongs;
+
+            return album;
 
         }
 
