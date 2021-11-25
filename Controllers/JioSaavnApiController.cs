@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using Json.Net;
 using System.Text.RegularExpressions;
 using GminorApi.Models;
 namespace GminorApi.Controllers
@@ -186,9 +188,9 @@ namespace GminorApi.Controllers
 
             string result = jsonData.Result;
 
-            string lyrics = result.Split("\"lyrics\":\"")[1].Split("\",\"script_tracking_url\"")[0];
+            LyricsMeta test = JsonConvert.DeserializeObject<LyricsMeta>(result);
 
-            return lyrics;
+            return test.Lyrics;
 
         }
 
@@ -211,11 +213,11 @@ namespace GminorApi.Controllers
 
                     Startindex = text.IndexOf("title\":\"");
                     Endindex = text.IndexOf(",\"subtitle\":\"");
-                    song.Title = text.Substring(Startindex + 8, Endindex - Startindex - 9);
+                    song.Title = filter(text.Substring(Startindex + 8, Endindex - Startindex - 9));
 
                     Startindex = text.IndexOf(",\"subtitle\":\"");
                     Endindex = text.IndexOf("\",\"header_desc\"");
-                    song.Artist = text.Substring(Startindex + 13, Endindex - Startindex - 13);
+                    song.Artist = filter(text.Substring(Startindex + 13, Endindex - Startindex - 13));
 
                     Startindex = text.IndexOf("\"image\":\"");
                     Endindex = text.IndexOf("\",\"language\"");
@@ -227,6 +229,11 @@ namespace GminorApi.Controllers
             }
             return searchedsongs;
 
+        }
+
+        public static string filter(string st)
+        {
+            return st.Replace("&quot;", "'").Replace("&amp;", "&").Replace("&#039;", "'");
         }
     }
 }
