@@ -6,7 +6,9 @@
 /workspace/GminorApi/bin/Debug/net6.0/GminorApi.dll
 /workspace/GminorApi/bin/Debug/net6.0/ref/GminorApi.dll
 /workspace/GminorApi/bin/Debug/net6.0/GminorApi.pdb
+/workspace/GminorApi/bin/Debug/net6.0/Json.Net.dll
 /workspace/GminorApi/bin/Debug/net6.0/Microsoft.OpenApi.dll
+/workspace/GminorApi/bin/Debug/net6.0/Newtonsoft.Json.dll
 /workspace/GminorApi/bin/Debug/net6.0/Swashbuckle.AspNetCore.Swagger.dll
 /workspace/GminorApi/bin/Debug/net6.0/Swashbuckle.AspNetCore.SwaggerGen.dll
 /workspace/GminorApi/bin/Debug/net6.0/Swashbuckle.AspNetCore.SwaggerUI.dll
@@ -25,5 +27,3 @@
 /workspace/GminorApi/obj/Debug/net6.0/ref/GminorApi.dll
 /workspace/GminorApi/obj/Debug/net6.0/GminorApi.pdb
 /workspace/GminorApi/obj/Debug/net6.0/GminorApi.genruntimeconfig.cache
-/workspace/GminorApi/bin/Debug/net6.0/Newtonsoft.Json.dll
-/workspace/GminorApi/bin/Debug/net6.0/Json.Net.dll

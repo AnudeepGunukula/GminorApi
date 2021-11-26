@@ -20,55 +20,114 @@ namespace GminorApi.Controllers
 
         private static readonly string album_details_base_url = "https://www.jiosaavn.com/api.php?__call=content.getAlbumDetails&_format=json&cc=in&_marker=0%3F_marker%3D0&albumid=";
 
+
+        private static readonly List<string> user_agent = new List<String>(){
+
+                @"Opera/9.80 (X11; Linux i686; Ubuntu/14.10) Presto/2.12.388 Version/12.16",
+                @"Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_6; ko-kr) AppleWebKit/533.20.25 (KHTML, like Gecko) Version/5.0.4 Safari/533.20.27",
+                @"Mozilla/5.0 (Linux; U; Android 2.3.3; zh-tw; HTC Pyramid Build/GRI40) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1",
+                @"Mozilla/5.0 (Windows; U; MSIE 9.0; Windows NT 9.0; en-US)",
+                @"Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 7.1; Trident/5.0)",
+                @"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:94.0) Gecko/20100101 Firefox/94.0",
+                @"Mozilla/5.0 (X11; OpenBSD i386) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.125 Safari/537.36",
+                @"Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/534.9 (KHTML, like Gecko) Chrome/7.0.531.0 Safari/534.9"
+
+            };
+
+        public static Random random = new Random();
+
         [HttpPost]
         [Route("GetTrending")]
         public async Task<IActionResult> GetTrending()
         {
 
+
             List<SearchResult> songList = new List<SearchResult>();
             List<string> tokens = new List<string>(){
-                "8MT-LQlP35c_","I3kvhipIy73uCJW60TJk1Q__","C3TvSMCoP2A_","I3kvhipIy73uCJW60TJk1Q__","eM6m7c9EezYwkg5tVhI3fw__","j2,VLFcNmrA_","qI50eijQECA_","qI50eijQECA_"
+                "I3kvhipIy73uCJW60TJk1Q__","LdbVc1Z5i9E_", "jVmOAc1aK2OO0eMLZZxqsA__" ,"8MT-LQlP35c_","C3TvSMCoP2A_","eM6m7c9EezYwkg5tVhI3fw__","j2,VLFcNmrA_","qI50eijQECA_","m9Qkal5S733ufxkxMEIbIw__","tsJahdem34A_","I3kvhipIy73uCJW60TJk1Q__"
             };
+
             for (int i = 0; i < tokens.Count; i++)
             {
-                string url = $"https://www.jiosaavn.com/api.php?__call=webapi.get&token={tokens.ElementAt(i)}&type=playlist&p=1&n=50&includeMetaTags=0&ctx=wap6dot0&api_version=4&_format=json&_marker=0";
+                string url = $"https://www.jiosaavn.com:443/api.php?__call=webapi.get&token={tokens.ElementAt(i)}&type=playlist&p=1&n=50&includeMetaTags=0&ctx=wap6dot0&api_version=4&_format=json&_marker=0";
                 string referer = "https://www.jiosaavn.com/";
 
-                var httpClient = new HttpClient();
+
+                var httpClient = new HttpClient(new HttpClientHandler());
                 var request = new HttpRequestMessage(new HttpMethod("GET"), url);
-                request.Headers.TryAddWithoutValidation("Host", "www.jiosaavn.com");
-                request.Headers.TryAddWithoutValidation("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:94.0) Gecko/20100101 Firefox/94.0");
+
+                if (i == 0)
+                {
+                    referer = referer + "featured/trending_today/I3kvhipIy73uCJW60TJk1Q__";
+                }
+                else if (i == 1)
+                {
+                    referer = referer + "featured/weekly-top-songs/LdbVc1Z5i9E_";
+                    Console.WriteLine(referer);
+                }
+                else if (i == 2)
+                {
+                    referer = referer + "featured/romantic_top_40_-__english/jVmOAc1aK2OO0eMLZZxqsA__";
+                    Console.WriteLine(referer);
+                }
+
+                var user_ag = user_agent[random.Next(user_agent.Count)];
+                //request.Headers.TryAddWithoutValidation("Host", "www.jiosaavn.com");
+                request.Headers.TryAddWithoutValidation("User-Agent", user_ag);
                 request.Headers.TryAddWithoutValidation("Accept", "application/json, text/plain, */*");
                 request.Headers.TryAddWithoutValidation("Accept-Language", "en-US,en;q=0.5");
-                request.Headers.TryAddWithoutValidation("DNT", "1");
-                request.Headers.TryAddWithoutValidation("Connection", "keep-alive");
+                request.Headers.TryAddWithoutValidation("Sec-Ch-Ua-Mobile", "?0");
+                // request.Headers.TryAddWithoutValidation("DNT", "1");
+                // request.Headers.TryAddWithoutValidation("Connection", "keep-alive");
                 request.Headers.TryAddWithoutValidation("Referer", referer);
                 request.Headers.TryAddWithoutValidation("Sec-Fetch-Dest", "empty");
                 request.Headers.TryAddWithoutValidation("Sec-Fetch-Mode", "cors");
                 request.Headers.TryAddWithoutValidation("Sec-Fetch-Site", "same-origin");
-                request.Headers.TryAddWithoutValidation("Cache-Control", "max-age=0");
-                request.Headers.TryAddWithoutValidation("TE", "trailers");
+                request.Headers.TryAddWithoutValidation("Sec-Ch-Ua-Platform", "\"Windows\"");
+                // request.Headers.TryAddWithoutValidation("Cache-Control", "max-age=0");
+                //  request.Headers.TryAddWithoutValidation("TE", "trailers");
+
+
+                if (i == 0)
+                {
+                    request.Headers.TryAddWithoutValidation("Cookie", "L:english");
+                }
+                else if (i == 1 || i == 2)
+                {
+                    request.Headers.TryAddWithoutValidation("Cookie", "DL:english");
+                }
+
 
                 var response = await httpClient.SendAsync(request);
 
 
                 var result = response.Content.ReadAsStringAsync().Result;
 
+                if (i < 3 || i == tokens.Count - 1)
+                {
+                    System.IO.File.WriteAllText($"output{i}.text", result);
+                }
+
+
                 var songIds = GetSongs(result);
 
-                songIds.RemoveAt(0);
+
+                // songIds.RemoveAt(0);
 
                 Console.WriteLine(songIds.Count);
 
                 songList.AddRange(songIds);
 
             }
-            //songList = songList.GroupBy(x => x.Id).Select(x => x.First()).ToList();
+            songList = songList.GroupBy(x => x.Id).Select(x => x.First()).ToList();
             var shuffledsongs = songList.OrderBy(a => Guid.NewGuid()).ToList();
+
             Console.WriteLine(shuffledsongs.Count);
+
             return Ok(shuffledsongs);
 
         }
+
 
 
         [HttpPost]
@@ -77,10 +136,12 @@ namespace GminorApi.Controllers
         {
 
             string url = album_details_base_url + id;
-            var httpClient = new HttpClient();
+            var httpClient = new HttpClient(new HttpClientHandler());
             var request = new HttpRequestMessage(new HttpMethod("GET"), url);
+
+            var user_ag = user_agent[random.Next(user_agent.Count)];
             request.Headers.TryAddWithoutValidation("Host", "www.jiosaavn.com");
-            request.Headers.TryAddWithoutValidation("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:94.0) Gecko/20100101 Firefox/94.0");
+            request.Headers.TryAddWithoutValidation("User-Agent", user_ag);
             request.Headers.TryAddWithoutValidation("Accept", "application/json, text/plain, */*");
             request.Headers.TryAddWithoutValidation("Accept-Language", "en-US,en;q=0.5");
             request.Headers.TryAddWithoutValidation("DNT", "1");
@@ -162,7 +223,7 @@ namespace GminorApi.Controllers
             // in the below url p=1 means page 1, u can get much more results by incrementing it
             string url = "https://www.jiosaavn.com/api.php?p=1&q=" + songName + "&_format=json&_marker=0&api_version=4&ctx=wap6dot0&n=20&__call=search.getResults";
             string referer = "https://www.jiosaavn.com/search/" + songName;
-            var httpClient = new HttpClient();
+            var httpClient = new HttpClient(new HttpClientHandler());
             var request = new HttpRequestMessage(new HttpMethod("GET"), url);
             request.Headers.TryAddWithoutValidation("Host", "www.jiosaavn.com");
             request.Headers.TryAddWithoutValidation("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:94.0) Gecko/20100101 Firefox/94.0");
@@ -195,10 +256,12 @@ namespace GminorApi.Controllers
         public async Task<IActionResult> SongDetails(string id)
         {
             string url = song_details_base_url + id;
-            var httpClient = new HttpClient();
+            var httpClient = new HttpClient(new HttpClientHandler());
             var request = new HttpRequestMessage(new HttpMethod("GET"), url);
+
+            var user_ag = user_agent[random.Next(user_agent.Count)];
             request.Headers.TryAddWithoutValidation("Host", "www.jiosaavn.com");
-            request.Headers.TryAddWithoutValidation("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:94.0) Gecko/20100101 Firefox/94.0");
+            request.Headers.TryAddWithoutValidation("User-Agent", user_ag);
             request.Headers.TryAddWithoutValidation("Accept", "application/json, text/plain, */*");
             request.Headers.TryAddWithoutValidation("Accept-Language", "en-US,en;q=0.5");
             request.Headers.TryAddWithoutValidation("DNT", "1");
@@ -256,10 +319,12 @@ namespace GminorApi.Controllers
         {
 
             string url = lyrics_base_url + id;
-            var httpClient = new HttpClient();
+            var httpClient = new HttpClient(new HttpClientHandler());
             var request = new HttpRequestMessage(new HttpMethod("GET"), url);
+
+            var user_ag = user_agent[random.Next(user_agent.Count)];
             request.Headers.TryAddWithoutValidation("Host", "www.jiosaavn.com");
-            request.Headers.TryAddWithoutValidation("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:94.0) Gecko/20100101 Firefox/94.0");
+            request.Headers.TryAddWithoutValidation("User-Agent", user_ag);
             request.Headers.TryAddWithoutValidation("Accept", "application/json, text/plain, */*");
             request.Headers.TryAddWithoutValidation("Accept-Language", "en-US,en;q=0.5");
             request.Headers.TryAddWithoutValidation("DNT", "1");
