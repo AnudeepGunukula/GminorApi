@@ -36,7 +36,7 @@ namespace GminorApi.Controllers
 
         public static Random random = new Random();
 
-        [HttpPost]
+        [HttpGet]
         [Route("GetTrending")]
         public async Task<IActionResult> GetTrending()
         {
@@ -44,7 +44,7 @@ namespace GminorApi.Controllers
 
             List<SearchResult> songList = new List<SearchResult>();
             List<string> tokens = new List<string>(){
-                "I3kvhipIy73uCJW60TJk1Q__","LdbVc1Z5i9E_", "jVmOAc1aK2OO0eMLZZxqsA__" ,"8MT-LQlP35c_","C3TvSMCoP2A_","eM6m7c9EezYwkg5tVhI3fw__","j2,VLFcNmrA_","qI50eijQECA_","m9Qkal5S733ufxkxMEIbIw__","tsJahdem34A_","I3kvhipIy73uCJW60TJk1Q__"
+               "8MT-LQlP35c_","C3TvSMCoP2A_","eM6m7c9EezYwkg5tVhI3fw__","j2,VLFcNmrA_","qI50eijQECA_","m9Qkal5S733ufxkxMEIbIw__","tsJahdem34A_","I3kvhipIy73uCJW60TJk1Q__"
             };
 
             for (int i = 0; i < tokens.Count; i++)
@@ -55,64 +55,30 @@ namespace GminorApi.Controllers
 
                 var httpClient = new HttpClient(new HttpClientHandler());
                 var request = new HttpRequestMessage(new HttpMethod("GET"), url);
-
-                if (i == 0)
-                {
-                    referer = referer + "featured/trending_today/I3kvhipIy73uCJW60TJk1Q__";
-                }
-                else if (i == 1)
-                {
-                    referer = referer + "featured/weekly-top-songs/LdbVc1Z5i9E_";
-                    Console.WriteLine(referer);
-                }
-                else if (i == 2)
-                {
-                    referer = referer + "featured/romantic_top_40_-__english/jVmOAc1aK2OO0eMLZZxqsA__";
-                    Console.WriteLine(referer);
-                }
-
                 var user_ag = user_agent[random.Next(user_agent.Count)];
-                //request.Headers.TryAddWithoutValidation("Host", "www.jiosaavn.com");
+
+                request.Headers.TryAddWithoutValidation("Host", "www.jiosaavn.com");
                 request.Headers.TryAddWithoutValidation("User-Agent", user_ag);
                 request.Headers.TryAddWithoutValidation("Accept", "application/json, text/plain, */*");
                 request.Headers.TryAddWithoutValidation("Accept-Language", "en-US,en;q=0.5");
-                request.Headers.TryAddWithoutValidation("Sec-Ch-Ua-Mobile", "?0");
-                // request.Headers.TryAddWithoutValidation("DNT", "1");
-                // request.Headers.TryAddWithoutValidation("Connection", "keep-alive");
+                request.Headers.TryAddWithoutValidation("DNT", "1");
+                request.Headers.TryAddWithoutValidation("Connection", "keep-alive");
                 request.Headers.TryAddWithoutValidation("Referer", referer);
                 request.Headers.TryAddWithoutValidation("Sec-Fetch-Dest", "empty");
                 request.Headers.TryAddWithoutValidation("Sec-Fetch-Mode", "cors");
                 request.Headers.TryAddWithoutValidation("Sec-Fetch-Site", "same-origin");
-                request.Headers.TryAddWithoutValidation("Sec-Ch-Ua-Platform", "\"Windows\"");
-                // request.Headers.TryAddWithoutValidation("Cache-Control", "max-age=0");
-                //  request.Headers.TryAddWithoutValidation("TE", "trailers");
-
-
-                if (i == 0)
-                {
-                    request.Headers.TryAddWithoutValidation("Cookie", "L:english");
-                }
-                else if (i == 1 || i == 2)
-                {
-                    request.Headers.TryAddWithoutValidation("Cookie", "DL:english");
-                }
-
+                request.Headers.TryAddWithoutValidation("Cache-Control", "max-age=0");
+                request.Headers.TryAddWithoutValidation("TE", "trailers");
 
                 var response = await httpClient.SendAsync(request);
 
 
                 var result = response.Content.ReadAsStringAsync().Result;
 
-                if (i < 3 || i == tokens.Count - 1)
-                {
-                    System.IO.File.WriteAllText($"output{i}.text", result);
-                }
-
-
                 var songIds = GetSongs(result);
 
 
-                // songIds.RemoveAt(0);
+                songIds.RemoveAt(0);
 
                 Console.WriteLine(songIds.Count);
 
@@ -124,7 +90,38 @@ namespace GminorApi.Controllers
 
             Console.WriteLine(shuffledsongs.Count);
 
+            GetEnglish();
+
             return Ok(shuffledsongs);
+        }
+
+
+        [HttpGet]
+        [Route("GetEnglish")]
+        public async Task<IActionResult> GetEnglish()
+        {
+
+            // "I3kvhipIy73uCJW60TJk1Q__","LdbVc1Z5i9E_", "jVmOAc1aK2OO0eMLZZxqsA__" ,
+            string url = "https://www.jiosaavn.com/api.php?__call=webapi.get&token=LdbVc1Z5i9E_&type=playlist&p=1&n=50&includeMetaTags=0&ctx=web6dot0&api_version=4&_format=json&_marker=0";
+
+            var httpClient = new HttpClient(new HttpClientHandler());
+            var request = new HttpRequestMessage(new HttpMethod("GET"), url);
+            request.Headers.TryAddWithoutValidation("Host", "www.jiosaavn.com");
+            request.Headers.TryAddWithoutValidation("Cookie", "L:english");
+            request.Headers.TryAddWithoutValidation("Accept", "application/json, text/plain, */*");
+            request.Headers.TryAddWithoutValidation("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit / 537.36(KHTML, like Gecko) Chrome / 95.0.4638.69 Safari / 537.36");
+            request.Headers.TryAddWithoutValidation("Sec-Fetch-Site", "same-origin");
+            request.Headers.TryAddWithoutValidation("Sec-Fetch-Mode", "cors");
+            request.Headers.TryAddWithoutValidation("Sec-Fetch-Dest", "empty");
+            request.Headers.TryAddWithoutValidation("Origin","www.jiosaavn.com");
+            request.Headers.TryAddWithoutValidation("Referer", "https://www.jiosaavn.com/featured/trending_today/I3kvhipIy73uCJW60TJk1Q__");
+            request.Headers.TryAddWithoutValidation("Accept-Language", "en-US,en;q=0.9");
+
+            var response = await httpClient.SendAsync(request);
+
+            System.IO.File.WriteAllText("output.txt", response.Content.ReadAsStringAsync().Result);
+
+            return Ok();
 
         }
 
