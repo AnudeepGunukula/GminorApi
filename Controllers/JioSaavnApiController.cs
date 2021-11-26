@@ -20,66 +20,54 @@ namespace GminorApi.Controllers
 
         private static readonly string album_details_base_url = "https://www.jiosaavn.com/api.php?__call=content.getAlbumDetails&_format=json&cc=in&_marker=0%3F_marker%3D0&albumid=";
 
-        private static readonly string trending_songs_url1 = "https://www.jiosaavn.com/api.php?__call=webapi.get&token=8MT-LQlP35c_&type=playlist&p=1&n=50&includeMetaTags=0&ctx=wap6dot0&api_version=4&_format=json&_marker=0";
-
-        private static readonly string trending_songs_url2 = "https://www.jiosaavn.com/api.php?__call=webapi.get&token=I3kvhipIy73uCJW60TJk1Q__&type=playlist&p=1&n=50&includeMetaTags=0&ctx=wap6dot0&api_version=4&_format=json&_marker=0";
         [HttpPost]
         [Route("GetTrending")]
         public async Task<IActionResult> GetTrending()
         {
-            string url = trending_songs_url1;
-            string url1 = trending_songs_url2;
-            string referer = "https://www.jiosaavn.com/";
 
-            var httpClient = new HttpClient();
-            var request = new HttpRequestMessage(new HttpMethod("GET"), url);
-            var request1 = new HttpRequestMessage(new HttpMethod("GET"), url1);
-            request.Headers.TryAddWithoutValidation("Host", "www.jiosaavn.com");
-            request.Headers.TryAddWithoutValidation("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:94.0) Gecko/20100101 Firefox/94.0");
-            request.Headers.TryAddWithoutValidation("Accept", "application/json, text/plain, */*");
-            request.Headers.TryAddWithoutValidation("Accept-Language", "en-US,en;q=0.5");
-            request.Headers.TryAddWithoutValidation("DNT", "1");
-            request.Headers.TryAddWithoutValidation("Connection", "keep-alive");
-            request.Headers.TryAddWithoutValidation("Referer", referer);
-            request.Headers.TryAddWithoutValidation("Sec-Fetch-Dest", "empty");
-            request.Headers.TryAddWithoutValidation("Sec-Fetch-Mode", "cors");
-            request.Headers.TryAddWithoutValidation("Sec-Fetch-Site", "same-origin");
-            request.Headers.TryAddWithoutValidation("Cache-Control", "max-age=0");
-            request.Headers.TryAddWithoutValidation("TE", "trailers");
+            List<SearchResult> songList = new List<SearchResult>();
+            List<string> tokens = new List<string>(){
+                "8MT-LQlP35c_","I3kvhipIy73uCJW60TJk1Q__","C3TvSMCoP2A_","I3kvhipIy73uCJW60TJk1Q__","eM6m7c9EezYwkg5tVhI3fw__","j2,VLFcNmrA_","qI50eijQECA_","qI50eijQECA_"
+            };
+            for (int i = 0; i < tokens.Count; i++)
+            {
+                string url = $"https://www.jiosaavn.com/api.php?__call=webapi.get&token={tokens.ElementAt(i)}&type=playlist&p=1&n=50&includeMetaTags=0&ctx=wap6dot0&api_version=4&_format=json&_marker=0";
+                string referer = "https://www.jiosaavn.com/";
 
-            request1.Headers.TryAddWithoutValidation("Host", "www.jiosaavn.com");
-            request1.Headers.TryAddWithoutValidation("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:94.0) Gecko/20100101 Firefox/94.0");
-            request1.Headers.TryAddWithoutValidation("Accept", "application/json, text/plain, */*");
-            request1.Headers.TryAddWithoutValidation("Accept-Language", "en-US,en;q=0.5");
-            request1.Headers.TryAddWithoutValidation("DNT", "1");
-            request1.Headers.TryAddWithoutValidation("Connection", "keep-alive");
-            request1.Headers.TryAddWithoutValidation("Referer", referer);
-            request1.Headers.TryAddWithoutValidation("Sec-Fetch-Dest", "empty");
-            request1.Headers.TryAddWithoutValidation("Sec-Fetch-Mode", "cors");
-            request1.Headers.TryAddWithoutValidation("Sec-Fetch-Site", "same-origin");
-            request1.Headers.TryAddWithoutValidation("Cache-Control", "max-age=0");
-            request1.Headers.TryAddWithoutValidation("TE", "trailers");
+                var httpClient = new HttpClient();
+                var request = new HttpRequestMessage(new HttpMethod("GET"), url);
+                request.Headers.TryAddWithoutValidation("Host", "www.jiosaavn.com");
+                request.Headers.TryAddWithoutValidation("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:94.0) Gecko/20100101 Firefox/94.0");
+                request.Headers.TryAddWithoutValidation("Accept", "application/json, text/plain, */*");
+                request.Headers.TryAddWithoutValidation("Accept-Language", "en-US,en;q=0.5");
+                request.Headers.TryAddWithoutValidation("DNT", "1");
+                request.Headers.TryAddWithoutValidation("Connection", "keep-alive");
+                request.Headers.TryAddWithoutValidation("Referer", referer);
+                request.Headers.TryAddWithoutValidation("Sec-Fetch-Dest", "empty");
+                request.Headers.TryAddWithoutValidation("Sec-Fetch-Mode", "cors");
+                request.Headers.TryAddWithoutValidation("Sec-Fetch-Site", "same-origin");
+                request.Headers.TryAddWithoutValidation("Cache-Control", "max-age=0");
+                request.Headers.TryAddWithoutValidation("TE", "trailers");
 
-            var response = await httpClient.SendAsync(request);
-            var response1 = await httpClient.SendAsync(request1);
+                var response = await httpClient.SendAsync(request);
 
 
-            var result = response.Content.ReadAsStringAsync().Result;
-            var result1 = response1.Content.ReadAsStringAsync().Result;
+                var result = response.Content.ReadAsStringAsync().Result;
 
-            var songIds = GetSongs(result);
-            var songIds1 = GetSongs(result1);
-            songIds.RemoveAt(0);
-            songIds1.RemoveAt(0);
+                var songIds = GetSongs(result);
 
-            //var songList = songIds.Concat(songIds1);
+                songIds.RemoveAt(0);
 
-            var songList = songIds.Where(x => !songIds1.Any(l2 => l2.Id == x.Id)).Union(songIds1).ToList();
+                Console.WriteLine(songIds.Count);
 
-            Console.WriteLine(songList.Count);
+                songList.AddRange(songIds);
 
+            }
+            //songList = songList.GroupBy(x => x.Id).Select(x => x.First()).ToList();
+            var shuffledsongs = songList.OrderBy(a => Guid.NewGuid()).ToList();
+            Console.WriteLine(shuffledsongs.Count);
+            return Ok(shuffledsongs);
 
-            return Ok(songList);
         }
 
 
